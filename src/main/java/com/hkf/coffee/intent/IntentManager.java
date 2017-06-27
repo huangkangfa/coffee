@@ -5,6 +5,8 @@ import android.app.SearchManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -14,6 +16,7 @@ import android.provider.Settings;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Created by Administrator on 2017/3/15 0015.
@@ -185,6 +188,55 @@ public class IntentManager {
     }
 
     /**
+     * 包名方式跳转至指定APP
+     * @param context
+     * @param packageName
+     * @return
+     */
+    public static String goAppIntentByPackageName(Context context,String packageName){
+        try {
+            Intent it=context.getPackageManager().getLaunchIntentForPackage(packageName);
+            context.startActivity(it);
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+        return null;
+    }
+
+    /**
+     * 通过包名获取应用程序的名称。
+     *
+     * @param context     Context对象。
+     * @param packageName 包名。
+     * @return 返回包名所对应的应用程序的名称。
+     */
+    public static String getAppNameByPackageName(Context context,String packageName) {
+        PackageManager pm = context.getPackageManager();
+        String name = null;
+        try {
+            name = pm.getApplicationLabel(pm.getApplicationInfo(packageName,PackageManager.GET_META_DATA)).toString();
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return name;
+    }
+
+    /**
+     * Uri方式跳转至指定APP
+     * @param context
+     * @param s
+     * @return
+     */
+    public static String goAppIntentByString(Context context,String s){
+        try {
+            context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(s)));
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+        return null;
+    }
+
+    /**
      * 获取系统图片或者拍摄照片
      */
     private static File file;  //拍照图片缓存地址
@@ -244,4 +296,23 @@ public class IntentManager {
         return f.exists()?uri:null;
     }
 
+    /**
+     * 获取手机内所有应用程序信息
+     * @param context
+     * @return
+     */
+    public static List<PackageInfo> getAllApplicationInfo(Context context){
+        PackageManager packageManager = context.getPackageManager();
+        List<PackageInfo> list = packageManager.getInstalledPackages(PackageManager.GET_PERMISSIONS);
+        return list;
+    }
+
+    /**
+     * 判断对应包名的程序是否安装
+     * @param packageName
+     * @return
+     */
+    public static boolean isInstallByread(String packageName) {
+        return new File("/data/data/" + packageName).exists();
+    }
 }
